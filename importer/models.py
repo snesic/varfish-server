@@ -141,7 +141,7 @@ class VariantSetImportInfo(models.Model):
 
     genomebuild = models.CharField(
         max_length=32,
-        choices=(("GRCh37", "GRCh37"),),
+        choices=(("GRCh37", "GRCh37"), ("GRCh38", "GRCh38")),
         default="GRCh37",
         help_text="Genome build used in the variant set.",
     )

@@ -12,6 +12,10 @@ End-User Summary
 - Fixing Kiosk mode of VarFish.
 - Fixing displaying of beacon information in results table.
 - Fixing broken flags & comments popup for structural variants.
+- VarFish now allows for the import of GRCh38 annotated variants.
+  For this, GRCh38 background data must be imported.
+  Kiosk mode does not support GRCh38 yet.
+  **This is a breaking change, new data and CLI must be used!**
 
 Full Change List
 ================
@@ -23,6 +27,8 @@ Full Change List
 - Mapping kiosk jobs to import queue.
 - Fixing displaying of beacon information in results table.
 - Fixing broken flags & comments popup for structural variants.
+- Adjusting models and UI for supporting GRCh38 annotated cases.
+  It is currently not possible to migrate a GRCh37 case to GRCh38.
 
 -------
 v0.23.9

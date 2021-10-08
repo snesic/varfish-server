@@ -337,6 +337,7 @@ class CoreCaseFactory(factory.django.DjangoModelFactory):
         #: affected.
         inheritance = "denovo"
 
+    release = factory.Sequence(lambda n: "GRCh%d" % (37 + n % 2))
     name = factory.LazyAttributeSequence(lambda o, n: "case %03d: %s" % (n, o.structure))
     index = factory.Sequence(lambda n: "index_%03d-N1-DNA1-WES1" % n)
     pedigree = []

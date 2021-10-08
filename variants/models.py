@@ -470,6 +470,8 @@ CASE_STATUS_CHOICES = (
 class CoreCase(models.Model):
     """Abstract base class for Case core fields."""
 
+    #: Genome build
+    release = models.CharField(max_length=32, null=True, default="GRCh37")
     #: Name of the case.
     name = models.CharField(max_length=512)
     #: Identifier of the index in ``pedigree``.
@@ -949,6 +951,8 @@ class SmallVariantSet(models.Model):
     case = models.ForeignKey(
         Case, on_delete=models.CASCADE, null=False, help_text="The case that this set is for"
     )
+    #: Genome build
+    release = models.CharField(max_length=32, null=True, default="GRCh37")
     #: The state of the variant set.
     state = models.CharField(
         max_length=16,
