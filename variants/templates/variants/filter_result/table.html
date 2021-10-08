@@ -232,6 +232,9 @@
           <a type="button" id="logPopover" class="btn btn-sm btn-light" data-title="Background job logs" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="0" data-placement="top" data-html="true" data-content="<pre>{{ logs|join:"<br>" }}</pre>">
             <span class="iconify" data-icon="mdi:format-list-bulleted-square" data-inline="false"></span> Show logs
           </a>
+          <small class="badge badge-secondary">
+            {{ case.release }}
+          </small>
         </div>
       </div>
     </div>
