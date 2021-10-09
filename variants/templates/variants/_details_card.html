@@ -29,9 +29,17 @@
           <a href="{% url 'variants:case-list' project=project.sodar_uuid %}" class="btn btn-secondary btn-small">
             <span class="iconify" data-icon="mdi:format-list-bulleted-square" data-inline="false"></span> See list of all cases
           </a>
-          <a href="{% url 'variants:project-cases-filter' project=project.sodar_uuid %}" class="float-right btn btn-primary btn-small">
-            <i class="iconify" data-icon="mdi:filter"></i> Joint Filtration
-          </a>
+          {% same_release cases as cases_same_release %}
+          {% if project_cases_same_release %}
+            <a href="{% url 'variants:project-cases-filter' project=project.sodar_uuid %}" class="float-right btn btn-primary btn-small">
+              <i class="iconify" data-icon="mdi:filter"></i> Joint Filtration
+            </a>
+          {% else %}
+            <span class="btn btn-primary disabled" data-toggle="tooltip" title="Joint filtration impossible, different genomes in project.">
+              <i class="iconify" data-icon="mdi:filter"></i>
+              Joint Filtration
+            </span>
+          {% endif %}
         </td>
       </tr>
     {% else %}

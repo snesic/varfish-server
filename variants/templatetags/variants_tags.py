@@ -531,3 +531,9 @@ def linkout_base_url(database, release):
 @register.simple_tag
 def gnomad_release(release):
     return {"GRCh37": "gnomad_r2_1", "GRCh38": "gnomad_r3"}.get(release, None)
+
+
+@register.simple_tag
+def same_release(cases):
+    """Return whether an iterable of cases has the same genome release."""
+    return len({case.release for case in cases}) == 1
