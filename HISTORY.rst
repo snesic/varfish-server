@@ -6,6 +6,8 @@ History / Changelog
 HEAD (unreleased)
 -----------------
 
+Breaking changes, see below.
+
 End-User Summary
 ================
 
@@ -29,6 +31,7 @@ Full Change List
 - Fixing broken flags & comments popup for structural variants.
 - Adjusting models and UI for supporting GRCh38 annotated cases.
   It is currently not possible to migrate a GRCh37 case to GRCh38.
+- Setting ``VARFISH_CADD_SUBMISSION_RELEASE`` is called ``VARFISH_CADD_SUBMISSION_VERSION`` now (**breaking change**).
 
 -------
 v0.23.9

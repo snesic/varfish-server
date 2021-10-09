@@ -483,7 +483,7 @@ VARFISH_CADD_MAX_VARS = env.int("VARFISH_CADD_MAX_VARS", 5000)
 # Enable submission of variants to CADD server.
 VARFISH_ENABLE_CADD_SUBMISSION = env.bool("VARFISH_ENABLE_CADD_SUBMISSION", default=False)
 # CADD version to use for for submission
-VARFISH_CADD_SUBMISSION_RELEASE = env.str("VARFISH_CADD_SUBMISSION_RELEASE", default="GRCh37-v1.6")
+VARFISH_CADD_SUBMISSION_VERSION = env.str("VARFISH_CADD_SUBMISSION_VERSION", default="v1.6")
 
 # Varfish: MutationTaster URL
 VARFISH_MUTATIONTASTER_REST_API_URL = env.str(

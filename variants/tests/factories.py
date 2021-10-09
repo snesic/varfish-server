@@ -10,7 +10,7 @@ from projectroles.models import SODAR_CONSTANTS, RemoteSite
 
 from bgjobs.tests.factories import BackgroundJobFactory
 
-from config.settings.base import VARFISH_CADD_SUBMISSION_RELEASE
+from config.settings.base import VARFISH_CADD_SUBMISSION_VERSION
 from ..models import (
     Case,
     SmallVariant,
@@ -835,7 +835,7 @@ class CaddSubmissionBgJobFactory(factory.django.DjangoModelFactory):
     query_args = factory.LazyAttribute(
         lambda o: vars(ResubmitFormDataFactory(names=o.case.get_members()))
     )
-    cadd_version = VARFISH_CADD_SUBMISSION_RELEASE
+    cadd_version = VARFISH_CADD_SUBMISSION_VERSION
 
 
 class ExportFileBgJobFactory(factory.django.DjangoModelFactory):
