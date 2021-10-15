@@ -361,6 +361,7 @@ class CaseImporter:
             with transaction.atomic():
                 self.case, case_created = Case.objects.get_or_create(
                     name=self.import_info.name,
+                    release=self.import_info.release,
                     project=self.import_info.project,
                     defaults={
                         "index": self.import_info.index,
@@ -368,10 +369,10 @@ class CaseImporter:
                     },
                 )
                 if not case_created:
-                    if self.case.release != self.import_info.genomebuild:
+                    if self.case.release != self.import_info.release:
                         self.import_job.add_log_entry(
                             "Tried to import data for genome build %s into case with genome build %s"
-                            % (self.import_info.genomebuild, self.case.release),
+                            % (self.import_info.release, self.case.release),
                             LOG_LEVEL_ERROR,
                         )
                         raise RuntimeError(

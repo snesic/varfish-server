@@ -84,6 +84,8 @@ class CaseForm(forms.ModelForm):
                 choices=((0, "unknown"), (1, "unaffected"), (2, "affected")),
             )
 
+        self.genomebuild = self.instance.release
+
     def save(self, commit=True):
         case = super().save(commit=False)
 
@@ -1481,22 +1483,16 @@ class ProjectCasesFilterForm(
 
     def _get_genomebuild(self):
         """Return genome build for case or cohort or project"""
-        if self.case:
-            return self.case.release
+        if isinstance(self.project_or_cohort, Cohort):
+            cases = [
+                case for case in self.project_or_cohort.get_accessible_cases_for_user(self.user)
+            ]
+        else:  # project
+            cases = [case for case in self.project_or_cohort.case_set.all()]
+        if not cases:
+            return "GRCh37"
         else:
-            if isinstance(self.project_or_cohort, Cohort):
-                cases = [
-                    case
-                    for case in self.project_or_cohort.get_accessible_cases_for_user(
-                        self.job.bg_job.user
-                    )
-                ]
-            else:  # project
-                cases = [case for case in self.project_or_cohort.case_set.all()]
-            if not cases:
-                return "GRCh37"
-            else:
-                return cases[0].release
+            return cases[0].release
 
     def get_pedigree(self):
         """Return ``list`` of ``dict`` with pedigree information."""
