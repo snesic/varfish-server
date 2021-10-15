@@ -14,10 +14,10 @@
       Joint Filtration
     </a>
   {% else %}
-    <span class="btn btn-primary disabled" data-toggle="tooltip" title="Joint filtration impossible, different genomes in project.">
+    <a class="btn btn-primary disabled" data-toggle="tooltip" title="Joint filtration impossible, different genomes in project.">
       <i class="iconify" data-icon="mdi:filter"></i>
       Joint Filtration
-    </span>
+    </a>
   {% endif %}
   {% if request.user.is_superuser or kiosk_mode %}
     {% if disable_pedigree_sex_check %}

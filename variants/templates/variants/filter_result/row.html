@@ -63,7 +63,7 @@
   </td>
   <td style="width: 120px;" class="pl-2 detail-info-coordinates" data-order="{{ entry.chromosome_no|stringformat:"02d" }}-{{ entry.start|stringformat:"09d" }}">
     <div class="text-nowrap">
-      chr{{ entry.chromosome }}:{{ entry.start|intcomma }}
+      {% entry_chr entry %}:{{ entry.start|intcomma }}
       {% if entry.chromosome_no == 25 %}
         {% if entry.start|check_mt_position_homopolymer or entry.end|check_mt_position_homopolymer %}
           <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Variant in homopolymeric region'></i>
@@ -444,7 +444,7 @@
     <div class="btn-group sodar-list-btn-group pr-2">
       {% if entry.release == "GRCh37" %}
         <a
-          href="javascript:mutationTaster('chr{{ entry.chromosome }}', {{ entry.start }}, '{{ entry.reference }}', '{{ entry.alternative }}');"
+          href="javascript:mutationTaster('{{ entry.chromosome }}', {{ entry.start }}, '{{ entry.reference }}', '{{ entry.alternative }}');"
           data-toggle="tooltip"
           title="Open variant in MutationTaster"
           class="btn btn-primary sodar-list-btn">

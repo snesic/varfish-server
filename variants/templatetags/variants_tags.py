@@ -537,3 +537,15 @@ def gnomad_release(release):
 def same_release(cases):
     """Return whether an iterable of cases has the same genome release."""
     return len({case.release for case in cases}) == 1
+
+
+@register.simple_tag
+def entry_chr(entry):
+    """Return chromosome value for the result entry.
+
+    Adds ``chr`` prefix as required.
+    """
+    if not entry.chromosome.startswith("chr"):
+        return "chr" + entry.chromosome
+    else:
+        return entry.chromosome

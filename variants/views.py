@@ -2432,8 +2432,13 @@ class CaseLoadPrefetchedFilterView(
                 else:
                     hpoterms[hpo] = "unknown term"
 
+        genomebuild = "GRCh37"
+        if rows:
+            genomebuild = rows[0]["release"]
+
         result.update(
             {
+                "genomebuild": genomebuild,
                 "user": self.request.user,
                 "case": filter_job.smallvariantquery.case,
                 "result_rows": rows,
