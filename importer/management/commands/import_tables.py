@@ -7,7 +7,7 @@ import tempfile
 
 from variants.helpers import get_engine
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
+from django.db import connection, transaction
 
 from clinvar.models import Clinvar, refresh_clinvar_clinvarpathogenicgenes
 from conservation.models import KnowngeneAA
@@ -110,8 +110,9 @@ _TABLES_NOREF = {
 #: One entry in the TABLES variable is structured as follows:
 #: 'genome_build': {'table_group': (Table,), ...}
 TABLES = {
-    "GRCh37": {**_TABLES_BOTH, **_TABLES_GRCH37, **_TABLES_NOREF},
-    "GRCh37": {**_TABLES_BOTH, **_TABLES_GRCH38, **_TABLES_NOREF},
+    "GRCh37": {**_TABLES_BOTH, **_TABLES_GRCH37},
+    "GRCh38": {**_TABLES_BOTH, **_TABLES_GRCH38},
+    "noref": _TABLES_NOREF,
 }
 SERVICE_NAME_CHOICES = ["CADD", "Exomiser"]
 SERVICE_GENOMEBUILD_CHOICES = ["GRCh37", "GRCh38"]
@@ -155,7 +156,13 @@ class Command(BaseCommand):
             choices=SERVICE_GENOMEBUILD_CHOICES,
         )
         parser.add_argument(
-            "--force", help="Force import, removes old data", action="store_true", default=False
+            "--force", help="Force import, overwrites old data", action="store_true", default=False
+        )
+        parser.add_argument(
+            "--truncate",
+            help="Truncate tables before importing, removes old data",
+            action="store_true",
+            default=False,
         )
         parser.add_argument(
             # Using 8 threads by default as this will make all (currently) large tables import in parallel.
@@ -201,8 +208,6 @@ class Command(BaseCommand):
 
         if not os.path.isfile(path_import_versions):
             raise CommandError("Require version import info file {}.".format(path_import_versions))
-
-        self._switch_vacuum(enable=False)
 
         with self._without_vaccuum():
             import_infos = list(tsv_reader(path_import_versions))
@@ -277,17 +282,26 @@ class Command(BaseCommand):
         # Special import routine for kegg
         if table_group == "kegg":
             self._import_kegg(
-                version_path, TABLES[import_info["build"]][table_group], force=options["force"]
+                version_path,
+                TABLES[import_info["build"]][table_group],
+                force=options["force"],
+                truncate=options["truncate"],
             )
         # Special import routine for gnomAD
         elif table_group in ("gnomAD_genomes", "gnomAD_exomes"):
             self._import_gnomad(
-                version_path, TABLES[import_info["build"]][table_group], force=options["force"]
+                version_path,
+                TABLES[import_info["build"]][table_group],
+                force=options["force"],
+                truncate=options["truncate"],
             )
         # Special import routine for dbSNP
         elif table_group == "dbSNP":
             self._import_dbsnp(
-                version_path, TABLES[import_info["build"]][table_group], force=options["force"]
+                version_path,
+                TABLES[import_info["build"]][table_group],
+                force=options["force"],
+                truncate=options["truncate"],
             )
         # Special import routine for gene intervals
         elif table_group in ("ensembl_genes", "refseq_genes"):
@@ -296,6 +310,7 @@ class Command(BaseCommand):
                 TABLES[import_info["build"]][table_group],
                 table_group.rstrip("_genes"),
                 force=options["force"],
+                truncate=options["truncate"],
             )
         # Special import routine for tads
         elif table_group in ("tads_imr90", "tads_hesc"):
@@ -304,6 +319,7 @@ class Command(BaseCommand):
                 TABLES[import_info["build"]][table_group],
                 table_group[5:],
                 force=options["force"],
+                truncate=options["truncate"],
             )
         # Import routine for no-bulk-imports
         elif table_group in ("ensembl_regulatory", "vista"):
@@ -312,6 +328,7 @@ class Command(BaseCommand):
                     *self._get_table_info(version_path, table.__name__),
                     table,
                     force=options["force"],
+                    truncate=options["truncate"],
                     bulk=False,
                 )
         # Import routine for bulk imports (default)
@@ -321,6 +338,7 @@ class Command(BaseCommand):
                     *self._get_table_info(version_path, table.__name__),
                     table,
                     force=options["force"],
+                    truncate=options["truncate"],
                 )
             # Refresh clinvar materialized view if one of the depending tables was updated.
             # Depending tables: Clinvar, Hgnc, RefseqToHgnc
@@ -333,12 +351,24 @@ class Command(BaseCommand):
                 refresh_geneinfo_geneidtoinheritance()
                 refresh_geneinfo_geneidinhpo()
 
-    def _import_tad_set(self, path, tables, subset_key, force):
+    def _truncate(self, models):
+        # Truncate tables if asked to do so.
+        cursor = connection.cursor()
+        self.stdout.write("Truncating tables %s..." % models)
+        for model in models:
+            query = 'TRUNCATE TABLE "%s"' % model._meta.db_table
+            self.stdout.write("  executing %s" % query)
+            cursor.execute(query)
+
+    def _import_tad_set(self, path, tables, subset_key, force, truncate):
         """TAD import"""
         release_info = self._get_table_info(path, tables[0].__name__)[1]
         if not self._create_import_info_record(release_info):
             return False
 
+        # Truncate tables if asked to do so.
+        if truncate:
+            self._truncate((TadSet, TadInterval, TadBoundaryInterval))
         # Clear out old data if any
         TadSet.objects.filter(release=release_info["genomebuild"], name=subset_key).delete()
 
@@ -376,12 +406,15 @@ class Command(BaseCommand):
                     )
         self.stdout.write(self.style.SUCCESS("Finished importing TADs"))
 
-    def _import_gene_interval(self, path, tables, subset_key, force):
+    def _import_gene_interval(self, path, tables, subset_key, force, truncate):
         """Common code for RefSeq and ENSEMBL gene import."""
         release_info = self._get_table_info(path, tables[0].__name__)[1]
         release_info["table"] += ":%s" % subset_key
         if not self._create_import_info_record(release_info):
             return False
+        # Truncate tables if asked to do so.
+        if truncate:
+            self._truncate((GeneInterval,))
         # Clear out any existing entries for this release/database.
         GeneInterval.objects.filter(
             database=subset_key, release=release_info["genomebuild"]
@@ -424,7 +457,7 @@ class Command(BaseCommand):
         return next(tsv_reader(path))
 
     def _get_import_info_record(self, release_info):
-        """Check if entry exsits in import info table."""
+        """Check if entry exists in import info table."""
         return ImportInfo.objects.filter(
             genomebuild=release_info["genomebuild"], table=release_info["table"]
         )
@@ -443,7 +476,15 @@ class Command(BaseCommand):
             )
 
     def _import(
-        self, path, release_info, table, import_info=True, service=False, force=False, bulk=True
+        self,
+        path,
+        release_info,
+        table,
+        import_info=True,
+        service=False,
+        force=False,
+        bulk=True,
+        truncate=False,
     ):
         """Bulk data into table and add entry to ImportInfo table.
 
@@ -451,6 +492,7 @@ class Command(BaseCommand):
         :param release_info: Content of release info as dict
         :param table: Django model object of table to import
         :param null: Null value for bulk import
+        :param truncate: Whether or not to truncate tables.
         :return: Boolean if import happened (True) or not (False)
         """
 
@@ -462,6 +504,10 @@ class Command(BaseCommand):
 
         if not service and not release_info["table"] == table.__name__:
             CommandError("Table name in release_info file does not match table name.")
+
+        # Truncate tables if asked to do so.
+        if truncate:
+            self._truncate((table,))
 
         # Skip importing table if record already exists in import info table and re-import is not forced.
         if import_info and not force and self._get_import_info_record(release_info).exists():
@@ -533,7 +579,7 @@ class Command(BaseCommand):
         )
         return True
 
-    def _import_kegg(self, path, tables, force):
+    def _import_kegg(self, path, tables, force, truncate):
         """Wrapper function to import kegg databases.
 
         :param path: Path to kegg tables
@@ -547,14 +593,22 @@ class Command(BaseCommand):
         mapping = {entry.kegg_id: str(entry.id) for entry in KeggInfo.objects.all()}
         # Import EnsembleToKegg
         self._replace_pk_in_kegg_and_import(
-            mapping, *self._get_table_info(path, tables[1].__name__), tables[1], force
+            mapping,
+            *self._get_table_info(path, tables[1].__name__),
+            tables[1],
+            force,
+            truncate=truncate,
         )
         # Import RefseqToKegg
         self._replace_pk_in_kegg_and_import(
-            mapping, *self._get_table_info(path, tables[2].__name__), tables[2], force
+            mapping,
+            *self._get_table_info(path, tables[2].__name__),
+            tables[2],
+            force,
+            truncate=truncate,
         )
 
-    def _replace_pk_in_kegg_and_import(self, mapping, path, release_info, table, force):
+    def _replace_pk_in_kegg_and_import(self, mapping, path, release_info, table, force, truncate):
         """Wrapper function to replace pk in mapping tables before import (and then import).
 
         :param mapping: Mapping of kegg ids to KeggInfo pks.
@@ -580,7 +634,7 @@ class Command(BaseCommand):
                 tmp.write("\t".join(fields))
                 tmp.write("\n")
             tmp.flush()
-            return self._import(tmp.name, release_info, table, force=force)
+            return self._import(tmp.name, release_info, table, force=force, truncate=truncate)
 
     def _import_gnomad(self, path, tables, force):
         self._import_chromosome_wise(path, tables, force, list(range(1, 23)) + ["X"])
@@ -597,7 +651,7 @@ class Command(BaseCommand):
         """
         # Import file is scattered into chromosome pieces, collect them.
         for chrom in chroms:
-            # If the first chromosome can't be imported, don't try to import the other chromosomes.
+            # If the any chromosome can't be imported, don't try to import the other chromosomes.
             if not self._import(
                 # Add chromosome to file name
                 *self._get_table_info(path, "{}.{}".format(tables[0].__name__, chrom)),
