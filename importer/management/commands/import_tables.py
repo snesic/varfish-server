@@ -302,6 +302,7 @@ class Command(BaseCommand):
                 TABLES[import_info["build"]][table_group],
                 force=options["force"],
                 truncate=options["truncate"],
+                release=import_info["build"],
             )
         # Special import routine for gene intervals
         elif table_group in ("ensembl_genes", "refseq_genes"):
@@ -549,6 +550,7 @@ class Command(BaseCommand):
                     self.stderr.write(
                         "Error during import to table %s:\n%s" % (table._meta.db_table, e)
                     )
+                    traceback.print_exc(file=self.stderr)
                     # Remove already imported data.
                     sa_table = get_meta().tables[table._meta.db_table]
                     if "release" in sa_table.c:
@@ -639,9 +641,10 @@ class Command(BaseCommand):
     def _import_gnomad(self, path, tables, force, truncate):
         self._import_chromosome_wise(path, tables, force, truncate, list(range(1, 23)) + ["X"])
 
-    def _import_dbsnp(self, path, tables, force, truncate):
+    def _import_dbsnp(self, path, tables, force, truncate, release):
+        chr_mt = ["MT"] if release == "GRCh37" else ["M"]
         self._import_chromosome_wise(
-            path, tables, force, truncate, list(range(1, 23)) + ["X", "Y", "MT"]
+            path, tables, force, truncate, list(range(1, 23)) + ["X", "Y"] + chr_mt
         )
 
     def _import_chromosome_wise(self, path, tables, force, truncate, chroms):

@@ -33,6 +33,7 @@ Full Change List
   It is currently not possible to migrate a GRCh37 case to GRCh38.
 - Setting ``VARFISH_CADD_SUBMISSION_RELEASE`` is called ``VARFISH_CADD_SUBMISSION_VERSION`` now (**breaking change**).
 - ``import_info.tsv`` expected as in data release from ``20210728`` as built from varfish-db-downloader ``1b03e97`` or later.
+- Extending  columns of ``Hgnc`` to upstream update.
 
 -------
 v0.23.9
