@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import os
 import sys
 import traceback
@@ -56,46 +57,61 @@ from ..helpers import tsv_reader
 from svdbs.models import DgvGoldStandardSvs, DgvSvs, ExacCnv, ThousandGenomesSv, DbVarSv, GnomAdSv
 from variants.helpers import get_meta
 
+
+#: Tables in both GRCh37 and GRCh38.
+_TABLES_BOTH = {
+    "clinvar": (Clinvar,),
+    "dbSNP": (Dbsnp,),
+    "dbVar": (DbVarSv,),
+    "DGV": (DgvGoldStandardSvs, DgvSvs),
+    "ensembl_genes": (GeneInterval,),
+    "ensembl_regulatory": (EnsemblRegulatoryFeature,),
+    "ensembltogenesymbol": (EnsemblToGeneSymbol,),
+    "ensembltorefseq": (EnsemblToRefseq,),
+    "ExAC_constraints": (ExacConstraints,),
+    "extra_annos": (ExtraAnno, ExtraAnnoField),
+    "gnomAD_constraints": (GnomadConstraints,),
+    "gnomAD_exomes": (GnomadExomes,),
+    "gnomAD_genomes": (GnomadGenomes,),
+    "HelixMTdb": (HelixMtDb,),
+    "hgmd_public": (HgmdPublicLocus,),
+    "hgnc": (Hgnc, RefseqToHgnc),
+    "knowngeneaa": (KnowngeneAA,),
+    "MITOMAP": (Mitomap,),
+    "mtDB": (MtDb,),
+    "refseq_genes": (GeneInterval,),
+}
+
+#: Tables only in GRCh37.
+_TABLES_GRCH37 = {
+    "ExAC": (Exac, ExacCnv),
+    "gnomAD_SV": (GnomAdSv,),
+    "tads_hesc": (TadInterval, TadBoundaryInterval, TadSet),
+    "tads_imr90": (TadInterval, TadBoundaryInterval, TadSet),
+    "thousand_genomes": (ThousandGenomes, ThousandGenomesSv),
+    "vista": (VistaEnhancer,),
+}
+
+#: Tables shared between GRCh37 and GRCh38.
+_TABLES_GRCH38 = {}
+
+#: Tables without reference, shared between GRCh37 and GRCh38.
+_TABLES_NOREF = {
+    "acmg": (Acmg,),
+    "hpo": (Hpo, HpoName),
+    "kegg": (KeggInfo, EnsemblToKegg, RefseqToKegg),
+    "mgi": (MgiHomMouseHumanSequence,),
+    "mim2gene": (Mim2geneMedgen,),
+    "ncbi_gene": (NcbiGeneInfo, NcbiGeneRif),
+    "refseqtoensembl": (RefseqToEnsembl,),
+    "refseqtogenesymbol": (RefseqToGeneSymbol,),
+}
+
 #: One entry in the TABLES variable is structured as follows:
 #: 'genome_build': {'table_group': (Table,), ...}
 TABLES = {
-    "GRCh37": {
-        "acmg": (Acmg,),
-        "clinvar": (Clinvar,),
-        "dbSNP": (Dbsnp,),
-        "dbVar": (DbVarSv,),
-        "DGV": (DgvGoldStandardSvs, DgvSvs),
-        "ensembl_genes": (GeneInterval,),
-        "ensembl_regulatory": (EnsemblRegulatoryFeature,),
-        "ensembltorefseq": (EnsemblToRefseq,),
-        "ExAC_constraints": (ExacConstraints,),
-        "ExAC": (Exac, ExacCnv),
-        "extra-annos": (ExtraAnno, ExtraAnnoField),
-        "gnomAD_constraints": (GnomadConstraints,),
-        "gnomAD_exomes": (GnomadExomes,),
-        "gnomAD_genomes": (GnomadGenomes,),
-        "gnomAD_SV": (GnomAdSv,),
-        "hgmd_public": (HgmdPublicLocus,),
-        "hgnc": (Hgnc, RefseqToHgnc),
-        "hpo": (Hpo, HpoName),
-        "kegg": (KeggInfo, EnsemblToKegg, RefseqToKegg),
-        "knowngeneaa": (KnowngeneAA,),
-        "mgi": (MgiHomMouseHumanSequence,),
-        "mim2gene": (Mim2geneMedgen,),
-        "ncbi_gene": (NcbiGeneInfo, NcbiGeneRif),
-        "refseq_genes": (GeneInterval,),
-        "refseqtoensembl": (RefseqToEnsembl,),
-        "tads_hesc": (TadInterval, TadBoundaryInterval, TadSet),
-        "tads_imr90": (TadInterval, TadBoundaryInterval, TadSet),
-        "thousand_genomes": (ThousandGenomes, ThousandGenomesSv),
-        "vista": (VistaEnhancer,),
-        "refseqtogenesymbol": (RefseqToGeneSymbol,),
-        "ensembltogenesymbol": (EnsemblToGeneSymbol,),
-        "MITOMAP": (Mitomap,),
-        "mtDB": (MtDb,),
-        "HelixMTdb": (HelixMtDb,),
-    },
-    "GRCh38": {"clinvar": (Clinvar,), "dbVar": (DbVarSv,), "DGV": (DgvSvs,)},
+    "GRCh37": {**_TABLES_BOTH, **_TABLES_GRCH37, **_TABLES_NOREF},
+    "GRCh37": {**_TABLES_BOTH, **_TABLES_GRCH38, **_TABLES_NOREF},
 }
 SERVICE_NAME_CHOICES = ["CADD", "Exomiser"]
 SERVICE_GENOMEBUILD_CHOICES = ["GRCh37", "GRCh38"]
@@ -188,31 +204,36 @@ class Command(BaseCommand):
 
         self._switch_vacuum(enable=False)
 
-        import_infos = list(tsv_reader(path_import_versions))
-        if options["threads"] == 0:  # sequential
-            for import_info in import_infos:
-                if import_info["table_group"] in TABLES[import_info["build"]]:
-                    self._handle_import(import_info, options)
-                else:
-                    self.stderr.write(
-                        "Table group {} is no registered table group.".format(
-                            import_info["table_group"]
+        with self._without_vaccuum():
+            import_infos = list(tsv_reader(path_import_versions))
+            if options["threads"] == 0:  # sequential
+                for import_info in import_infos:
+                    if import_info["table_group"] in TABLES[import_info["build"]]:
+                        self._handle_import(import_info, options)
+                    else:
+                        self.stderr.write(
+                            "Table group {} is no registered table group.".format(
+                                import_info["table_group"]
+                            )
                         )
-                    )
-        else:
-            pool = ThreadPool(processes=options["threads"])
-            for import_info in import_infos:
-                if import_info["table_group"] in TABLES[import_info["build"]]:
-                    pool.apply_async(self._handle_import_try_catch, (import_info, options))
-                else:
-                    self.stderr.write(
-                        "Table group {} is no registered table group.".format(
-                            import_info["table_group"]
+            else:
+                pool = ThreadPool(processes=options["threads"])
+                for import_info in import_infos:
+                    if import_info["table_group"] in TABLES[import_info["build"]]:
+                        pool.apply_async(self._handle_import_try_catch, (import_info, options))
+                    else:
+                        self.stderr.write(
+                            "Table group {} is no registered table group.".format(
+                                import_info["table_group"]
+                            )
                         )
-                    )
-            pool.close()
-            pool.join()
+                pool.close()
+                pool.join()
 
+    @contextmanager
+    def _without_vaccuum(self):
+        self._switch_vacuum(enable=False)
+        yield
         self._switch_vacuum(enable=True)
 
     def _switch_vacuum(self, enable):
