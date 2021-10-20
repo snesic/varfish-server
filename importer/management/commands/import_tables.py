@@ -636,13 +636,15 @@ class Command(BaseCommand):
             tmp.flush()
             return self._import(tmp.name, release_info, table, force=force, truncate=truncate)
 
-    def _import_gnomad(self, path, tables, force):
-        self._import_chromosome_wise(path, tables, force, list(range(1, 23)) + ["X"])
+    def _import_gnomad(self, path, tables, force, truncate):
+        self._import_chromosome_wise(path, tables, force, truncate, list(range(1, 23)) + ["X"])
 
-    def _import_dbsnp(self, path, tables, force):
-        self._import_chromosome_wise(path, tables, force, list(range(1, 23)) + ["X", "Y", "MT"])
+    def _import_dbsnp(self, path, tables, force, truncate):
+        self._import_chromosome_wise(
+            path, tables, force, truncate, list(range(1, 23)) + ["X", "Y", "MT"]
+        )
 
-    def _import_chromosome_wise(self, path, tables, force, chroms):
+    def _import_chromosome_wise(self, path, tables, force, truncate, chroms):
         """Wrapper function to import gnomad tables
 
         :param path: Path to gnomad tables
@@ -650,7 +652,7 @@ class Command(BaseCommand):
         :return: Nothing
         """
         # Import file is scattered into chromosome pieces, collect them.
-        for chrom in chroms:
+        for no, chrom in enumerate(chroms):
             # If the any chromosome can't be imported, don't try to import the other chromosomes.
             if not self._import(
                 # Add chromosome to file name
@@ -659,5 +661,6 @@ class Command(BaseCommand):
                 # Import into info table only once
                 chrom == 1,
                 force=force,
+                truncate=truncate and no == 0,
             ):
                 break
