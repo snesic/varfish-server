@@ -9,7 +9,7 @@
     <div class="container-fluid sodar-page-container">
       {% if missed_records > 0 %}
         <div class="alert alert-warning">
-          <strong><i class="fa fa-warning text-warning"></i> {{ missed_records }} records of the previous query not shown.</strong>
+          <strong><i class="iconify text-warning" data-icon="bi:exclamation-circle"></i> {{ missed_records }} records of the previous query not shown.</strong>
           This means that the access to the cases was restricted in the meantime.
         </div>
       {% endif %}
@@ -61,7 +61,7 @@
                     </span>
                     {% with omim_information=hpo_id|add_omim_information %}
                       {% if omim_information %}
-                        <i class='fa fa-arrow-right'></i>
+                        <i class='iconify' data-icon='mdi:arrow-right-circle'></i>
                         <strong>(</strong>
                         {% for key, value in omim_information.items %}
                           <span class='badge badge-group' style='font-size: 100%'>
@@ -212,7 +212,7 @@
         </div>
         <div class="pl-3">
           {% if missed_records > 0 %}
-            <i class="text-warning fa fa-warning" data-toggle="tooltip"
+            <i class="text-warning iconify" data-icon="bi:exclamation-circle" data-toggle="tooltip"
                title="{{ missed_records }} records not shown. This means that the access to the cases was restricted in the meantime."></i>
           {% endif %}
           First <strong>{{ result_rows|length }} of {{ result_count }}</strong> records

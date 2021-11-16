@@ -8,7 +8,7 @@
       <i class="fa fa-bar-chart"></i>
       Project-wide Variant Statistics
       <a class="btn btn-primary pull-right" href="{% url "variants:project-stats-job-create" project=project.sodar_uuid %}">
-        <i class="fa fa-refresh"></i>
+        <i class="iconify" data-icon="mdi:refresh"></i>
         Recompute Stats
       </a>
     </h4>
@@ -48,7 +48,7 @@
           No project-wide variant statistics yet.
           Use
           <span class="badge badge-primary">
-            <i class="fa fa-refresh"></i>
+            <i class="iconify" data-icon="mdi:refresh"></i>
             Recompute Stats
           </span>
           to compute.
@@ -142,7 +142,7 @@
             <td class="text-right">{{ item.ontarget_transversions|intcomma }}</td>
             <td class="text-right">
               {% if item.ontarget_ts_tv_ratio < 2.0 and item.ontarget_ts_tv_ratio > 2.9 %}
-                <i class="fa fa-exclamation-triangle text-danger"
+                <i class="iconfiy text-danger" data-icon="bi:exclamation-circle"
                    data-toggle="tooltip" data-placement="top"
                    title="On-target Ts/Tv ratio should be within 2.0-2.9, but is {{ item.ontarget_ts_tv_ratio }}"
                 ></i>

@@ -106,7 +106,7 @@
           {{ object.num_small_vars|default_if_none:"-"|intcomma }}
           {% if object.num_small_vars %}
             {% if not object.latest_variant_set %}
-              <i class="fa fa-exclamation-triangle text-danger" data-toggle="tooltip" title="Variants reported but no variant set available. Inconsistent state, please report to the aministrators."></i>
+              <i class="iconify text-danger" data-icon="bi:exclamation-circle" data-toggle="tooltip" title="Variants reported but no variant set available. Inconsistent state, please report to the aministrators."></i>
             {% endif %}
           {% else %}
             <i class="fa fa-info-circle text-muted" data-toggle="tooltip" title="small variant filtration not possible"></i>
@@ -120,7 +120,7 @@
             {{ object.num_svs|default_if_none:"-"|intcomma }}
             {% if object.num_svs %}
               {% if not object.latest_structural_variant_set %}
-                <i class="fa fa-exclamation-triangle text-danger" data-toggle="tooltip" title="SVs reported but no structural variant set available. Inconsistent state, please report to the aministrators."></i>
+                <i class="iconify text-danger" data-icon="bi:exclamation-circle" data-toggle="tooltip" title="SVs reported but no structural variant set available. Inconsistent state, please report to the aministrators."></i>
               {% endif %}
             {% else %}
               <i class="fa fa-info-circle text-muted" data-toggle="tooltip" title="SV filtration not possible"></i>

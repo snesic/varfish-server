@@ -125,7 +125,7 @@ function displayError(msg) {
   resultsTable.empty();
   resultsTable.html(
     '<div class="alert alert-danger">' +
-    '<i class="fa fa-exclamation-triangle"></i> ' +
+    '<i class="iconify" data-icon="bi:exclamation-circle"></i> ' +
     '<strong>' + msg + '</strong>' +
     '</div>'
   );
@@ -344,7 +344,7 @@ function handleEventStateGetJobId(eventType, event) {
     resultsTable.html(
       '<div class="alert alert-info">' +
       '  <strong>No query has been started yet.</strong><br>' +
-      '   Click <span class="badge badge-primary"><i class="fa fa-refresh"></i> Filter & Display</span> to start filtering and create results to display here.' +
+      '   Click <span class="badge badge-primary"><i class="iconify" data-icon="mdi:refresh"></i> Filter & Display</span> to start filtering and create results to display here.' +
       '   You may want to adjust the filter settings to your needs first.' +
       '</div>'
     );

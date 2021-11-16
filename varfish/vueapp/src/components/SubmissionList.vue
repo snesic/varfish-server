@@ -20,7 +20,7 @@
                 @click="onListItemClicked(item.sodar_uuid)"
             >
               {{ getSubmissionLabel(item) }}
-              <i v-if="item._isInvalid" class="fa fa-warning text-warning"></i>
+              <i v-if="item._isInvalid" class="iconify text-warning" data-icon="bi:exclamation-circle"></i>
               <div class="pull-right">
                 <i class="fa fa-chevron-right"></i>
               </div>

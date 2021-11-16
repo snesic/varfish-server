@@ -66,7 +66,7 @@
       chr{{ entry.chromosome }}:{{ entry.start|intcomma }}
       {% if entry.chromosome_no == 25 %}
         {% if entry.start|check_mt_position_homopolymer or entry.end|check_mt_position_homopolymer %}
-          <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Variant in homopolymeric region'></i>
+          <i class="iconify text-muted" data-icon="bi:exclamation-circle" data-toggle="tooltip" title='Variant in homopolymeric region'></i>
         {% endif %}
       {% endif %}
     </div>
@@ -117,7 +117,7 @@
     {% else %}
       {{ entry.exac_frequency|floatformat:5|default:"-" }}
       {% if warning %}
-        <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
+        <i class="iconify text-muted" data-icon="bi:exclamation-circle" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
       {% endif %}
     {% endif %}
   </td>
@@ -127,7 +127,7 @@
     {% else %}
       {{ entry.gnomad_exomes_frequency|floatformat:5|default:"-" }}
       {% if warning %}
-        <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
+        <i class="text-muted iconify" data-icon="bi:exclamation-circle" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
       {% endif %}
     {% endif %}
   </td>
@@ -137,7 +137,7 @@
     {% else %}
       {{ entry.gnomad_genomes_frequency|floatformat:5|default:"-" }}
       {% if warning %}
-        <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
+        <i class="iconify text-muted" data-icon="bi:exclamation-circle" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
       {% endif %}
     {% endif %}
   </td>
@@ -147,7 +147,7 @@
     {% else %}
       {{ entry.thousand_genomes_frequency|floatformat:5|default:"-" }}
       {% if warning %}
-        <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
+        <i class="iconify text-muted" data-icon="bi:exclamation-circle" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
       {% endif %}
     {% endif %}
   </td>
@@ -182,7 +182,7 @@
   <td class="detail-frequencies-inhouse text-right">
     {{ entry.inhouse_carriers|default_if_none:"-" }}
     {% if warning %}
-      <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
+      <i class="iconify text-muted" data-icon="bi:exclamation-circle" data-toggle="tooltip" title='Table(s) {{ warning|join:", " }} contain(s) freq > 0.1 or #hom > 50'></i>
     {% endif %}
   </td>
   <td class="detail-frequencies-inhouse text-right">
@@ -191,7 +191,7 @@
   <td class="detail-frequencies-mtdb text-right">
     {% if entry.chromosome_no == 25 %}
       {% if entry.mtdb_dloop %}
-        <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Variant is in D-loop region'></i>
+        <i class="iconify text-muted" data-icon="bi:exclamation-circle" data-toggle="tooltip" title='Variant is in D-loop region'></i>
       {% endif %}
       {{ entry.mtdb_frequency|floatformat:5|default_if_none:"-" }}
     {% else %}
@@ -208,7 +208,7 @@
   <td class="detail-frequencies-helixmtdb text-right text-nowrap">
     {% if entry.chromosome_no == 25 %}
       {% if entry.helixmtdb_is_triallelic %}
-        <i class="fa fa-warning text-muted" data-toggle="tooltip" title='Variant is part of a triallelic site'></i>
+        <i class="iconify text-muted" data-icon="bi:exclamation-circle" data-toggle="tooltip" title='Variant is part of a triallelic site'></i>
       {% endif %}
       {{ entry.helixmtdb_frequency|floatformat:5|default_if_none:"-" }}
     {% else %}
