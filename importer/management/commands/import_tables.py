@@ -138,6 +138,9 @@ class Command(BaseCommand):
     #: Help message displayed on the command line.
     help = "Bulk import all external databases into Varfish tables."
 
+    #: Meta information from aldjemy.
+    _meta = None
+
     def add_arguments(self, parser):
         """Add the command's argument to the ``parser``."""
         parser.add_argument("--tables-path", help="Path to the varfish-db-downloader folder")
@@ -208,6 +211,8 @@ class Command(BaseCommand):
 
         if not os.path.isfile(path_import_versions):
             raise CommandError("Require version import info file {}.".format(path_import_versions))
+
+        self._meta = get_meta()
 
         with self._without_vaccuum():
             import_infos = list(tsv_reader(path_import_versions))
@@ -526,7 +531,7 @@ class Command(BaseCommand):
             # Clear out any existing entries for this release/database.
             if import_info:
                 self.stdout.write("{table} -- Removing old {table} results.".format(**release_info))
-                sa_table = get_meta().tables[table._meta.db_table]
+                sa_table = self._meta.tables[table._meta.db_table]
                 if "release" in sa_table.c:
                     get_engine().execute(
                         sa_table.delete().where(sa_table.c.release == release_info["genomebuild"])
@@ -552,7 +557,7 @@ class Command(BaseCommand):
                     )
                     traceback.print_exc(file=self.stderr)
                     # Remove already imported data.
-                    sa_table = get_meta().tables[table._meta.db_table]
+                    sa_table = self._meta.tables[table._meta.db_table]
                     if "release" in sa_table.c:
                         get_engine().execute(
                             sa_table.delete().where(
