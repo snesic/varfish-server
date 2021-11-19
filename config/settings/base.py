@@ -192,6 +192,65 @@ if KIOSK_MODE:
     logger.info("Enabling VarFishKioskUserMiddleware")
     MIDDLEWARE += ["varfish.utils.VarFishKioskUserMiddleware"]
 
+# Logging
+# ------------------------------------------------------------------------------
+
+# Custom logging level
+LOGGING_LEVEL = env.str('LOGGING_LEVEL', 'DEBUG' if DEBUG else 'ERROR')
+
+# List of apps to include in logging
+LOGGING_APPS = env.list(
+    'LOGGING_APPS',
+    default=[
+        'projectroles',
+        'siteinfo',
+        'sodarcache',
+        'taskflowbackend',
+        'timeline',
+    ],
+)
+
+# Path for file logging. If not set, will log only to console
+LOGGING_FILE_PATH = env.str('LOGGING_FILE_PATH', None)
+
+
+def set_logging(level=None):
+    if not level:
+        level = 'DEBUG' if DEBUG else 'ERROR'
+    app_logger_config = {
+        'level': level,
+        'handlers': ['console', 'file'] if LOGGING_FILE_PATH else ['console'],
+        'propagate': True,
+    }
+    log_handlers = {
+        'console': {
+            'level': level,
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        }
+    }
+    if LOGGING_FILE_PATH:
+        log_handlers['file'] = {
+            'level': level,
+            'class': 'logging.FileHandler',
+            'filename': LOGGING_FILE_PATH,
+            'formatter': 'simple',
+        }
+    return {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'simple': {
+                'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            }
+        },
+        'handlers': log_handlers,
+        'loggers': {a: app_logger_config for a in LOGGING_APPS},
+    }
+
+
+LOGGING = set_logging(LOGGING_LEVEL)
+
 # FIXTURE CONFIGURATION
 # ------------------------------------------------------------------------------
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-FIXTURE_DIRS
@@ -258,7 +317,7 @@ ALDJEMY_ENGINES = {"postgres": "postgresql+psycopg2"}
 
 # GENERAL CONFIGURATION
 # ------------------------------------------------------------------------------
-# Local time zone for this installation. Choices can be found here:
+# Local  zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
