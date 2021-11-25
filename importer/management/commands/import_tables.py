@@ -68,7 +68,6 @@ _TABLES_BOTH = {
     "ensembl_regulatory": (EnsemblRegulatoryFeature,),
     "ensembltogenesymbol": (EnsemblToGeneSymbol,),
     "ensembltorefseq": (EnsemblToRefseq,),
-    "ExAC_constraints": (ExacConstraints,),
     "extra_annos": (ExtraAnno, ExtraAnnoField),
     "gnomAD_constraints": (GnomadConstraints,),
     "gnomAD_exomes": (GnomadExomes,),
@@ -98,6 +97,7 @@ _TABLES_GRCH38 = {}
 #: Tables without reference, shared between GRCh37 and GRCh38.
 _TABLES_NOREF = {
     "acmg": (Acmg,),
+    "ExAC_constraints": (ExacConstraints,),
     "hpo": (Hpo, HpoName),
     "kegg": (KeggInfo, EnsemblToKegg, RefseqToKegg),
     "mgi": (MgiHomMouseHumanSequence,),
