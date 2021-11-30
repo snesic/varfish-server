@@ -3037,10 +3037,11 @@ class SmallVariantDetails(
             "%(base_url)sannotate-var/%(database)s/%(genome)s/%(chromosome)s/%(position)s/%(reference)s/"
             "%(alternative)s"
         )
+        genome = {"GRCh37": "hg19", "GRCh38": "hg38"}.get(kwargs["release"], "hg19")
         url = url_tpl % {
             "base_url": settings.VARFISH_JANNOVAR_REST_API_URL,
             "database": kwargs["database"],
-            "genome": "hg19",
+            "genome": genome,
             "chromosome": kwargs["chromosome"],
             "position": kwargs["start"],
             "reference": kwargs["reference"],
