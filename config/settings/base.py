@@ -196,56 +196,42 @@ if KIOSK_MODE:
 # ------------------------------------------------------------------------------
 
 # Custom logging level
-LOGGING_LEVEL = env.str('LOGGING_LEVEL', 'DEBUG' if DEBUG else 'ERROR')
+LOGGING_LEVEL = env.str("LOGGING_LEVEL", "DEBUG" if DEBUG else "ERROR")
 
 # List of apps to include in logging
 LOGGING_APPS = env.list(
-    'LOGGING_APPS',
-    default=[
-        'projectroles',
-        'siteinfo',
-        'sodarcache',
-        'taskflowbackend',
-        'timeline',
-    ],
+    "LOGGING_APPS",
+    default=["projectroles", "siteinfo", "sodarcache", "taskflowbackend", "timeline",],
 )
 
 # Path for file logging. If not set, will log only to console
-LOGGING_FILE_PATH = env.str('LOGGING_FILE_PATH', None)
+LOGGING_FILE_PATH = env.str("LOGGING_FILE_PATH", None)
 
 
 def set_logging(level=None):
     if not level:
-        level = 'DEBUG' if DEBUG else 'ERROR'
+        level = "DEBUG" if DEBUG else "ERROR"
     app_logger_config = {
-        'level': level,
-        'handlers': ['console', 'file'] if LOGGING_FILE_PATH else ['console'],
-        'propagate': True,
+        "level": level,
+        "handlers": ["console", "file"] if LOGGING_FILE_PATH else ["console"],
+        "propagate": True,
     }
     log_handlers = {
-        'console': {
-            'level': level,
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        }
+        "console": {"level": level, "class": "logging.StreamHandler", "formatter": "simple",}
     }
     if LOGGING_FILE_PATH:
-        log_handlers['file'] = {
-            'level': level,
-            'class': 'logging.FileHandler',
-            'filename': LOGGING_FILE_PATH,
-            'formatter': 'simple',
+        log_handlers["file"] = {
+            "level": level,
+            "class": "logging.FileHandler",
+            "filename": LOGGING_FILE_PATH,
+            "formatter": "simple",
         }
     return {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'simple': {
-                'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-            }
-        },
-        'handlers': log_handlers,
-        'loggers': {a: app_logger_config for a in LOGGING_APPS},
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {"simple": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"}},
+        "handlers": log_handlers,
+        "loggers": {a: app_logger_config for a in LOGGING_APPS},
     }
 
 
