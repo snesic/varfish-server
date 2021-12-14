@@ -133,11 +133,11 @@ function displayError(msg) {
 
 // Helper function to switch the state of the submit button (make it "Submit").
 function animateFilterButtonSubmit() {
-  let icon = $("i", filterButton).clone();
+  let icon = $("svg", filterButton).clone();
   filterButton.text(" Filter & Display");
   icon.prependTo(filterButton);
   filterButton.attr("data-event-type", EVENT_SUBMIT);
-  icon.removeClass("fa-spin");
+  icon.removeClass("spin");
 }
 
 function toggleLogs() {
@@ -156,14 +156,14 @@ function toggleLogs() {
 
 // Helper function to switch the state of the submit button (make it "Cancel").
 function animateSubmitButtonCancel() {
-  let icon = $("i", filterButton).clone();
+  let icon = $("svg", filterButton).clone();
   filterButton.text(" Cancel");
   icon.prependTo(filterButton);
   filterButton.attr("data-event-type", EVENT_CANCEL);
   resultsTable.empty();
   resultsTable.html(
     '<div class="alert alert-info">' +
-    '<i class="fa fa-circle-o-notch fa-spin"></i> ' +
+    '<i class="iconify spin" data-icon="fa-solid:circle-notch"></i> ' +
     '<strong id="infoBoxTitle">Loading ...</strong> <button id="togglelogs" class="ml-3 btn btn-sm btn-info" onclick="toggleLogs()">Show Logs</button>' +
     '<div id="logger" class="d-none"></div>' +
     '</div>'
@@ -171,7 +171,7 @@ function animateSubmitButtonCancel() {
   if (getCookie("logs") == "1") {
     toggleLogs();
   }
-  icon.addClass("fa-spin");
+  icon.addClass("spin");
 }
 
 function setInfoBoxTitle(title) {

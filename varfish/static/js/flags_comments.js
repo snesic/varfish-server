@@ -94,11 +94,10 @@ function clickVariantBookmark() {
         dataType: "json",
       }).done(function(data) {
         // successfully updated flags, update bookmark display
-        $(outerThis).removeClass("fa-bookmark fa-bookmark-o");
         if (data["flag_bookmarked"] || data["flag_for_validation"] || data["flag_candidate"] || data["flag_final_causative"]) {
-          $(outerThis).addClass("fa-bookmark");
+          $(outerThis).attr("src", "/icons/fa-solid/bookmark.svg");
         } else {
-          $(outerThis).addClass("fa-bookmark-o");
+          $(outerThis).attr("src", "/icons/fa-regular/bookmark.svg");
         }
         // update row color
         var variantRow = $(outerThis).closest(".variant-row");
@@ -128,8 +127,7 @@ function clickVariantBookmark() {
         }).done(function(data) {
           // successfully updated flags, update bookmark display
           var commentTag = $(outerThis).closest(".bookmark").find(".variant-comment");
-          commentTag.removeClass("fa-comment fa-comment-o");
-          commentTag.addClass("fa-comment");
+          commentTag.attr("src", "/icons/fa-solid/comment.svg");
           let dtrow = dt.row($(outerThis).closest(".variant-row"));
           if (structural_or_small == "small" && dtrow.child() && dtrow.child().length) {
             loadVariantDetails(dtrow, cell);
